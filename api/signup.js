@@ -5,7 +5,7 @@ const ProfileModel = require('../models/ProfileModel');
 const FollowerModel = require('../models/FollowerModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const isEmail = ('validator/lib/isEmail');
+const isEmail = require("validator/lib/isEmail");
 const userPng =
   "https://res.cloudinary.com/indersingh/image/upload/v1593464618/App/user_mklcpl.png";
 
@@ -71,7 +71,7 @@ router.post('/', async (req, res) => {
         if (instagram) profileFields.social.instagram = instagram;
         if (twitter) profileFields.social.twitter = twitter;
 
-        await new ProfileModel(profileFiels).save();
+        await new ProfileModel(profileFields).save();
         await new FollowerModel({ user: user._id, followers: [], following: [] }).save();
 
         const payload = { userId: user._id };

@@ -4,7 +4,7 @@ const UserModel = require('../models/UserModel');
 const FollowerModel = require('../models/FollowerModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const isEmail = ('validator/lib/isEmail');
+const isEmail = require('validator/lib/isEmail');
 
 router.post('/', async (req, res) => {
     const {

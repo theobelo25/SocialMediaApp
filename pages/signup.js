@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Message, Segment, TextArea, Divider, Image } from 'semantic-ui-react';
+import axios from 'axios';
+
+import baseUrl from '../utils/baseUrl';
 
 import CommonInputs from '../components/Common/CommonInputs';
 import ImageDropDiv from '../components/Common/ImageDropDiv';
 import { HeaderMessage, FooterMessage } from '../components/Common/WelcomeMessage';
+import { registerUser } from '../utils/authUser';
+import { uploadPic } from '../utils/uploadPicToCloudinary';
 
 const regexUserName = /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/;
+let cancel;
 
 function Signup() {
     const [user, setUser] = useState({
@@ -36,7 +42,22 @@ function Signup() {
     const [ highlighted, setHighlighted ] = useState(false);
     const inputRef = useRef();
 
-    const handleSubmit = e => e.preventDefault();
+    const handleSubmit = async e =>{
+        e.preventDefault();
+        setFormLoading(true);
+
+        let profilePicUrl;
+        if (media !== null) {
+            profilePicUrl = await uploadPic(media);
+        }
+
+        if (media !== null && !profilePicUrl) {
+            setFormLoading(false);
+            return setErrorMsg('Error Uploading Image');
+        }
+
+        await registerUser( user, profilePicUrl, setErrorMsg, setFormLoading );
+    };
     const handleChange = e => {
         const { name, value, files } = e.target;
         setUser( prev => ({ ...prev, [name]: value }) );
@@ -51,11 +72,41 @@ function Signup() {
         isUser ? setSubmitDisabled(false) : setSubmitDisabled(true);
     }, [user]);
 
+    const checkUsername = async () => {
+        setUsernameLoading(true);
+        try {
+            cancel && cancel();
+
+            const CancelToken = axios.CancelToken;
+            const res = await axios.get(
+                `${baseUrl}/api/signup/${username}`, 
+                { cancelToken: new CancelToken( canceler => { cancel = canceler })}
+            )
+
+            if (errorMsg !== null) setErrorMsg(null);
+            
+            if (res.data === 'Available') {
+                setUsernameAvailable(true);
+                setUser(prev => ({ ...prev, username }));
+            }
+
+            
+        } catch (error) {
+            setErrorMsg('Username Not Available');
+            setUsernameAvailable(false);
+        }
+        setUsernameLoading(false);
+    };
+
+    useEffect(() => {
+        username === '' ? setUsernameAvailable(false) : checkUsername();
+    }, [username]);
+
     return (
         <>
             <HeaderMessage />
 
-            <Form loading={formLoading} error={errorMsg} onSubmit={handleSubmit}>
+            <Form loading={formLoading} error={errorMsg !== null} onSubmit={handleSubmit}>
                 <Message 
                     error 
                     header='Oops!' 
