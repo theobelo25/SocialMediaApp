@@ -1,20 +1,16 @@
 import axios from 'axios';
 import React from 'react';
 
-function Index({ posts }) {
+function Index({ user, userFollowStats }) {
+    console.log(user, userFollowStats);
     return <div>
-        {
-            posts && 
-            posts.length > 0 && 
-            posts.map(post => <h1 key={post.id}>{post.title}</h1>)
-        }
+        Homepage
     </div>
 };
 
 Index.getInitialProps = async ctx => {
     try {
         const res = await axios.get('https://jsonplaceholder.typicode.com/posts');
-        const { name } = ctx.query;
         
         return { posts: res.data}
         

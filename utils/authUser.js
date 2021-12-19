@@ -12,6 +12,7 @@ export const registerUser = async (
 ) => {
     try {
         const res = await axios.post(`${baseUrl}/api/signup`, { user, profilePicUrl });
+        console.log(res.data);
         setToken(res.data)
         
     } catch (error) {
@@ -36,6 +37,15 @@ export const loginUser = async (
         setError(errorMsg);
     }
     setLoading(false);
+};
+
+export const redirectUser = (ctx, location) => {
+    if (ctx.req) {
+        ctx.res.writeHead(302, { Location: location });
+        ctx.res.end();
+    } else {
+        Router.push(location);
+    }
 };
 
 const setToken = token => {
