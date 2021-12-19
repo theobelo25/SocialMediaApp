@@ -5,6 +5,20 @@ const FollowerModel = require('../models/FollowerModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const isEmail = require('validator/lib/isEmail');
+const authMiddleware = require('../middleware/authMiddleware');
+
+router.get('/', authMiddleware, async (req, res) => {
+    const {userId} = req;
+
+    try {
+        const user = await UserModel.findById(userId);
+        const userFollowStats = await FollowerModel({ user: userId });
+        return res.status(200).json({user, userFollowStats})
+    } catch (error) {
+        console.error(error);
+        return res.status(500).send('server error');
+    }
+})
 
 router.post('/', async (req, res) => {
     const {
@@ -32,8 +46,8 @@ router.post('/', async (req, res) => {
 
 
     } catch (error) {
-        console.error(err);
-        return res.status(500).send('server error');
+        console.error(error);
+        return res.status(500).send('Server Error');
     }
 });
 
