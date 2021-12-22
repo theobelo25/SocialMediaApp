@@ -1,11 +1,9 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 function Index({ user, userFollowStats }) {
-    console.log(user, userFollowStats);
-    return <div>
-        Homepage
-    </div>
+    useEffect(() => {document.title = `Welcome, ${user.name.split(' ')[0]}`}, []);
+    return <div>Homepage</div>
 };
 
 Index.getInitialProps = async ctx => {
