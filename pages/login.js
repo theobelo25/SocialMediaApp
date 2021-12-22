@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Message, Segment, TextArea, Divider, Image } from 'semantic-ui-react';
+import cookie from 'js-cookie';
 
 import { HeaderMessage, FooterMessage } from '../components/Common/WelcomeMessage';
 import { loginUser } from '../utils/authUser';
@@ -31,6 +32,12 @@ function Login() {
 
         await loginUser(user, setErrorMsg, setFormLoading );
     };
+
+    useEffect(() => {
+        document.title = "WelcomeBack";
+        const userEmail = cookie.get('userEmail')
+        if (userEmail) setUser(prev => ({ ...prev, email: userEmail }));
+    }, []);
 
     return (
         <>
