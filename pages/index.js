@@ -6,10 +6,10 @@ import CardPost from '../components/Post/CardPost';
 import { Segment } from 'semantic-ui-react';
 import { parseCookies } from 'nookies';
 import { NoPosts } from '../components/Layout/NoData';
-import { PostDeleteToastr } from '../components/Layout/Toastr'
+import { PostDeleteToastr } from '../components/Layout/Toastr';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PlaceHolderPosts, EndMessage } from '../components/Layout/PlaceHolderGroup';
-import cookie from 'js-cookie'
+import cookie from 'js-cookie';
 
 function Index({ user, postData, errorLoading }) {
     const [ posts, setPosts ] = useState(postData);
@@ -21,7 +21,7 @@ function Index({ user, postData, errorLoading }) {
 
     useEffect(() => {
         showToaster && setTimeout(() => setShowToaster(false), 3000);
-    }, [showToaster])
+    }, [showToaster]);
 
     const fetchDataOnScroll = async () => {
         try {
@@ -81,7 +81,7 @@ Index.getInitialProps = async (ctx) => {
 
         return { postData: res.data };
     } catch (error) {
-        return { errorLoading: true }
+        return { errorLoading: true };
     }
 };
 

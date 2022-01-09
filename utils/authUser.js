@@ -12,7 +12,6 @@ export const registerUser = async (
 ) => {
     try {
         const res = await axios.post(`${baseUrl}/api/signup`, { user, profilePicUrl });
-        console.log(res.data);
         setToken(res.data)
         
     } catch (error) {
