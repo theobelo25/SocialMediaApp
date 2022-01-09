@@ -4,7 +4,7 @@ const UserModel = require('../models/UserModel');
 const PostModel = require('../models/PostModel');
 const FollowerModel = require('../models/FollowerModel');
 const authMiddleware = require('../middleware/authMiddleware');
-const uuid = require('uuid').v4
+const uuid = require('uuid').v4;
 
 // Create a post
 router.post("/", authMiddleware, async (req, res) => {
@@ -30,35 +30,63 @@ router.post("/", authMiddleware, async (req, res) => {
       console.error(error);
       return res.status(500).send(`Server error`);
     }
-  });
+});
 
 // Get all posts
 router.get('/', authMiddleware, async (req, res) => {
     const { pageNumber } = req.query;
 
-    const number = Number(pageNumber);
-    const size = 8;
-
     try {
-        let posts;
+        const number = Number(pageNumber);
+        const size = 8;
+        const { userId } = req;
+
+        const loggedUser = await FollowerModel.findOne({ user: userId }).select('-followers');
+
+        let posts = [];
 
         if (number === 1) {
-            posts = await PostModel.find()
-                .limit(size)
-                .sort({ createdAt: -1 })
-                .populate('user')
-                .populate('comments.user');
+            if (loggedUser.following.length > 0) {
+                posts = await PostModel.find({ 
+                    user: { 
+                        $in: [ userId, ...loggedUser.following.map(following => following.user) ]
+                    } 
+                })
+                    .limit(size)
+                    .sort({createdAt: -1})
+                    .populate('user')
+                    .populate('comments.user')
+            } else {
+                posts = await PostModel.find({ user: userId })
+                    .limit(size)
+                    .sort({createdAt: -1})
+                    .populate('user')
+                    .populate('comments.user');
+            }
         } else {
             const skips = size * (number - 1);
-            posts = await PostModel.find()
-                .skip(skips)
-                .limit(size)
-                .sort({ createdAt: -1 })
-                .populate('user')
-                .populate('comments.user');
+
+            if (loggedUser.following.length > 0) {
+                posts = await PostModel.find({ 
+                    user: { 
+                        $in: [ userId, ...loggedUser.following.map(following => following.user) ]
+                    } 
+                })
+                    .skip(skips)
+                    .limit(size)
+                    .sort({createdAt: -1})
+                    .populate('user')
+                    .populate('comments.user')
+            } else {
+                posts = await PostModel.find({ user: userId })
+                    .skip(skips)
+                    .limit(size)
+                    .sort({createdAt: -1})
+                    .populate('user')
+                    .populate('comments.user');
+            }
         }
 
-        
         return res.json(posts);
         
     } catch (error) {
@@ -248,6 +276,5 @@ router.delete('/:postId/:commentId', authMiddleware, async (req,res) => {
         return res.status(500).send('Server Error');
     }
 });
-
 
 module.exports = router;
